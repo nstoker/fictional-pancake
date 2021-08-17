@@ -1,1 +1,0 @@
-const testVariable = "Hello from main.js"
