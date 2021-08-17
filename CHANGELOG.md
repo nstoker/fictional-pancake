@@ -10,3 +10,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Creation of golang server code.
 - Changed root to load directory.
 - Fixed loading of environment variables.
+- Completed [setup minimum files for vue](https://egghead.io/lessons/javascript-set-up-the-minimum-files-needed-to-run-vue-3).
