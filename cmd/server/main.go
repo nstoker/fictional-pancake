@@ -10,9 +10,9 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	log "github.com/nstoker/fictional-pancake/internal/app_logger"
 	"github.com/nstoker/fictional-pancake/internal/handlers"
 	"github.com/nstoker/fictional-pancake/internal/version"
-	"github.com/sirupsen/logrus"
 )
 
 type spaHandler struct {
@@ -55,16 +55,17 @@ func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	logrus.Infof("Hello, world! %s starting", version.Version())
+	defer log.Logger.Sync()
+	log.Logger.Infof("Hello, world! %s starting", version.Version())
 
 	err := godotenv.Load(".env")
 	if err != nil {
-		logrus.Infof("error loading godotenv file %v", err)
+		log.Logger.Infof("loading godotenv: %v", err)
 	}
 
 	port, frontend := loadEnvironmentVariables()
 
-	logrus.Infof("serving spa from %s", frontend)
+	log.Logger.Infof("serving spa from %s", frontend)
 
 	r := mux.NewRouter()
 	r.HandleFunc("/api/thumbnail", handlers.ThumbnailHandler)
@@ -73,7 +74,7 @@ func main() {
 	r.PathPrefix("/").Handler(spa)
 
 	host := fmt.Sprintf("localhost:%s", port)
-	logrus.Infof("Listening on %s", host)
+	log.Logger.Infof("Listening on %s", host)
 
 	walkRoutes(r)
 
@@ -86,20 +87,20 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	logrus.Fatal(srv.ListenAndServe())
+	log.Logger.Fatalf("%v", srv.ListenAndServe())
 }
 
 func loadEnvironmentVariables() (string, string) {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3030"
-		logrus.Infof("environment variable PORT not set, defaulting to %s", port)
+		log.Logger.Infof("environment variable PORT not set, defaulting to %s", port)
 	}
 
 	frontend := os.Getenv("FRONTEND")
 	if frontend == "" {
 		frontend = "./frontend/dist"
-		logrus.Infof("environment variable FRONTEND not set, defaulting to %s", frontend)
+		log.Logger.Infof("environment variable FRONTEND not set, defaulting to %s", frontend)
 	}
 
 	return port, frontend
@@ -140,7 +141,7 @@ func walkRoutes(r *mux.Router) {
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Do stuff here
-		logrus.Println(r.RequestURI)
+		log.Logger.Info(r.RequestURI)
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
 		next.ServeHTTP(w, r)
 	})

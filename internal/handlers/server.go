@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/nstoker/fictional-pancake/internal/app_logger"
 )
 
 type thumbnailRequest struct {
@@ -42,7 +42,7 @@ func ThumbnailHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	jsonString, err := json.Marshal(apiRequest)
 	if err != nil {
-		logrus.Error(err)
+		log.Logger.Error(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -56,7 +56,7 @@ func ThumbnailHandler(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	response, err := client.Do(req)
 	if err != nil {
-		logrus.Error(err)
+		log.Logger.Error(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -68,17 +68,17 @@ func ThumbnailHandler(w http.ResponseWriter, r *http.Request) {
 	var apiResponse screenshotAPIResponse
 	err = json.NewDecoder(response.Body).Decode(&apiResponse)
 	if err != nil {
-		logrus.Error(err)
+		log.Logger.Error(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	_, err = fmt.Fprintf(w, `{ "screenshot": "%s" }`, apiResponse.Screenshot)
 	if err != nil {
-		logrus.Error(err)
+		log.Logger.Error(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	logrus.Infof("Got the following URL %s", decoded.Url)
+	log.Logger.Infof("Got the following URL %s", decoded.Url)
 }
