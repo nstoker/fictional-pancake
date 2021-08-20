@@ -7,14 +7,14 @@ import (
 	"github.com/nstoker/fictional-pancake/internal/version"
 )
 
-type health struct {
+type Health struct {
 	OK      bool   `json:"ok"`
 	Version string `json:"version"`
 }
 
 func HealthHandler(w http.ResponseWriter, r *http.Request) {
 	// an example API handler
-	healthy := health{}
+	healthy := Health{}
 	healthy.OK = true
 	healthy.Version = version.Version()
 
