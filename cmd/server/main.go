@@ -68,8 +68,8 @@ func main() {
 	log.Logger.Infof("serving spa from %s", frontend)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/api/thumbnail", handlers.ThumbnailHandler).Methods("POST")
 	r.HandleFunc("/api/health", handlers.HealthHandler).Methods("GET")
+
 	spa := spaHandler{staticPath: frontend, indexPath: "index.html"}
 	r.PathPrefix("/").Handler(spa)
 	r.NotFoundHandler = http.HandlerFunc(handlers.NotFound)
