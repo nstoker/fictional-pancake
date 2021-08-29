@@ -16,3 +16,4 @@
 
 # Keep private credentials private
 .env
+/bin/server
