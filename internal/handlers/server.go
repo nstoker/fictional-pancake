@@ -21,6 +21,7 @@ type screenshotAPIRequest struct {
 	Width          int    `json:"width"`
 	Height         int    `json:"height"`
 	ThumbnailWidth int    `json:"thumbnail_width"`
+	FailOnError    bool   `json:"fail_on_error"`
 }
 
 func ThumbnailHandler(w http.ResponseWriter, r *http.Request) {
@@ -31,14 +32,19 @@ func ThumbnailHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
+	apiKey := os.Getenv("SCREENSHOT_API_KEY")
+	if apiKey == "" {
+		log.Logger.Errorf("environment variable 'SCREENSHOT_API_KEY' missing")
+		http.Error(w, "environment error", http.StatusInternalServerError)
+	}
 	apiRequest := screenshotAPIRequest{
-		Token:          os.Getenv("SCREENSHOT_API_KEY"),
+		Token:          apiKey,
 		Url:            decoded.Url,
 		Output:         "json",
 		Width:          1920,
 		Height:         1080,
 		ThumbnailWidth: 300,
+		FailOnError:    true,
 	}
 	jsonString, err := json.Marshal(apiRequest)
 	if err != nil {
@@ -62,6 +68,12 @@ func ThumbnailHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer response.Body.Close()
 
+	if err != nil {
+		log.Logger.Error(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	type screenshotAPIResponse struct {
 		Screenshot string `json:"screenshot"`
 	}
@@ -69,6 +81,7 @@ func ThumbnailHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(response.Body).Decode(&apiResponse)
 	if err != nil {
 		log.Logger.Error(err)
+
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
